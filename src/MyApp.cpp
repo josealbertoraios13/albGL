@@ -34,12 +34,15 @@ void InspectorMenu() {
     ImGui::LabelText("", "X: ");
     ImGui::SameLine();
     ImGui::InputFloat("##X:", &x);
+    ImGui::SliderFloat("##x", &x, -2000.0f, 2000.0f);
     ImGui::LabelText("", "Y: ");
     ImGui::SameLine();
     ImGui::InputFloat("##Y:", &y);
+    ImGui::SliderFloat("##y", &y, -2000.0f, 2000.0f);
     ImGui::LabelText("", "Z: ");
     ImGui::SameLine();
     ImGui::InputFloat("##Z:", &z);
+    ImGui::SliderFloat("##z", &z, -2000.0f, 2000.0f);
 
     ImGui::LabelText("Rotation:", "");
     ImGui::LabelText("", "rX: ");
@@ -51,15 +54,18 @@ void InspectorMenu() {
     ImGui::LabelText("", "rZ: ");
     ImGui::SameLine();
     ImGui::InputFloat("##rZ:", &rz);
+    ImGui::SliderFloat("##rz", &rz, -360.0f, 360.0f);
 
 
     ImGui::LabelText("Scales:", "");
     ImGui::LabelText("", "Width: ");
     ImGui::SameLine();
     ImGui::InputFloat("##Width:", &sx);
+    ImGui::SliderFloat("##Width", &sx, -10.0f, 10.0f);
     ImGui::LabelText("", "Height: ");
     ImGui::SameLine();
     ImGui::InputFloat("##Height:", &sy);
+    ImGui::SliderFloat("##Height", &sy, -10.0f, 10.0f);
     ImGui::LabelText("", "Forward: ");
     ImGui::SameLine();
     ImGui::InputFloat("##Forward:", &sz);

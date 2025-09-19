@@ -11,6 +11,10 @@
 #include <backends/imgui_impl_opengl3.h>
 
 #include <GL/glew.h>
+
+int Application::width = 800;   // valor inicial padrão
+int Application::height = 600;
+
 Application::Application() = default;
 
 Application::~Application() {
@@ -36,7 +40,7 @@ int Application::Run() {
         last = now;
 
         // Calcula o deltaTime em segundos
-        m_DeltaTime = (float)((now - last) * 1000 / (double)SDL_GetPerformanceFrequency());
+        m_DeltaTime = static_cast<float>((now - last) * 1000 / static_cast<double>(SDL_GetPerformanceFrequency()));
 
         //Fase de Processamento
         ProcessEvents(); // Processa Input SDL_Event
@@ -55,6 +59,12 @@ int Application::Run() {
     Shutdown();
     return 0;
 }
+
+void Application::setWindowSize(int _width, int _height) {
+    width = _width;
+    height = _height;
+}
+
 
 bool Application::Initialize() {
 
@@ -77,7 +87,7 @@ bool Application::Initialize() {
 
     //Cria a janela
     m_Window = SDL_CreateWindow
-    ("AlbGL", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
+    ("AlbGL", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
 
     if (m_Window == nullptr) {
         SDL_Log("SDL_CreateWindow Error: %s", SDL_GetError());
@@ -143,7 +153,7 @@ bool Application::Initialize() {
     return true;
 }
 
-void Application::Shutdown() {
+void Application::Shutdown() const{
     //Limpa ImGui
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplSDL2_Shutdown();
@@ -179,6 +189,8 @@ void Application::ProcessEvents() {
                     m_Running = false;
                 }
                 break;
+            default:
+                break;
         }
     }
 }
@@ -194,7 +206,7 @@ void Application::BeginFrame() {
     ImGui::NewFrame();
 }
 
-void Application::EndFrame() {
+void Application::EndFrame() const{
     // Renderiza ImGui
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

@@ -8,15 +8,15 @@
 #pragma once
 
 #include <SDL.h>
-#include <GL/glew.h>
 
 struct ImGuiIO;
 
 class Application {
-
     public:
+        static int width;
+        static int height;
         Application();
-        ~Application();
+        virtual ~Application();
 
         // Inicializa todos os sistemas e retorna o loop principal
         // Retorna o código de saída do programa
@@ -30,15 +30,17 @@ class Application {
         SDL_Window* GetWindow() const {return m_Window; }
         float GetTime() const {return m_Time; }
 
+        static void setWindowSize(int _width, int _height);
+
     private:
         // Métodos internos para inicialização e limpeza
         bool Initialize();
-        void Shutdown();
+        void Shutdown() const;
 
         // Métodos do loop principal
         void ProcessEvents();
-        void BeginFrame();
-        void EndFrame();
+        static void BeginFrame();
+        void EndFrame() const;
 
     private:
         // Estado da aplicação

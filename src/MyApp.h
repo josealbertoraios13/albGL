@@ -9,13 +9,9 @@
 #include "Core/Application.h"
 
 class MyApp : public Application {
-public:
-    void Start() override;
-    void Update(float deltaTime) override;
-private:
-    GLuint VAO = 0;
-    GLuint VBO = 0;
-    GLuint shaderProgram = 0;
+    public:
+        void Start() override;
+        void Update(float deltaTime) override;
 };
 
 

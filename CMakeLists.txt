@@ -24,6 +24,12 @@ set(IMGUI_SRC
         src/Core/Application.h
         src/MyApp.cpp
         src/MyApp.h
+        src/primitiveObjects/Mesh.cpp
+        src/primitiveObjects/Mesh.h
+        src/Transform/Vector3.cpp
+        src/Transform/Vector3.h
+        src/Transform/Transform.cpp
+        src/Transform/Transform.h
 )
 
 # Cria executável incluindo main.cpp e ImGui
@@ -47,3 +53,4 @@ target_link_libraries(albGL
         ${GLEW_LIBRARIES}
         ${OPENGL_LIBRARIES}
 )
+

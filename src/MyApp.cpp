@@ -4,15 +4,27 @@
 #include "MyApp.h"
 #include "primitiveObjects/Mesh.h"
 #include <imgui.h>
-#include "Transform/Vector3.h"
+#include <glm/vec3.hpp>
 
-float x, y, z;
-float rx, ry, rz;
-float sx = 1, sy = 1, sz = 1;
+#include "primitiveObjects/Ellipse.h"
+#include "primitiveObjects/Rectangle.h"
+#include "primitiveObjects/Triangle.h"
 
+Triangle* triangle;
+Rectangle* rectangle;
+Ellipse* circle;
+Vector3 position;
 
 void MyApp::Start() {
-
+    triangle = new Triangle();
+    triangle->SetColor(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+    triangle->transform.scale = Vector3(0.5f, 0.5f, 0.5f);
+    rectangle = new Rectangle();
+    rectangle->SetColor(glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
+    rectangle->transform.scale = Vector3(0.5f, 0.5f, 0.5f);
+    circle = new Ellipse();
+    circle->SetColor(glm::vec4(0.0f, 0.0f, 1.0f, 1.0f));
+    circle->transform.scale = Vector3(0.5f, 0.5f, 0.5f);
 }
 
 void DebugMenu() {
@@ -23,10 +35,7 @@ void DebugMenu() {
     ImGui::End();
 }
 
-void InspectorMenu() {
-
-
-
+/*void InspectorMenu() {
     ImGui::SetNextWindowSize(ImVec2(300, 600));
     ImGui::Begin("Inspector", nullptr, ImGuiWindowFlags_NoResize);
     ImGui::LabelText("", "Transform: ");
@@ -56,7 +65,6 @@ void InspectorMenu() {
     ImGui::InputFloat("##rZ:", &rz);
     ImGui::SliderFloat("##rz", &rz, -360.0f, 360.0f);
 
-
     ImGui::LabelText("Scales:", "");
     ImGui::LabelText("", "Width: ");
     ImGui::SameLine();
@@ -71,21 +79,13 @@ void InspectorMenu() {
     ImGui::InputFloat("##Forward:", &sz);
 
     ImGui::End();
-}
+}*/
 
 void MyApp::Update(float deltaTime) {
-
-    std::vector<float> triVerts = {
-        -0.5f, -0.5f, 0.0f,
-         0.5f, -0.5f, 0.0f,
-         0.0f,  0.5f, 0.0f
-    };
-    Mesh triangle(triVerts);
-    triangle.transform.position = Vector3(x / 1000, y / 1000, z / 1000);
-    triangle.transform.scale = Vector3(sx, sy, sz);
-    triangle.transform.rotation = Vector3(rx, ry, rz);
-    triangle.Draw();
-
-    InspectorMenu();
+    triangle->Draw();
+    rectangle->Draw();
+    circle->Draw();
+    rectangle->transform.position = Vector3(0.8f, 0.0f, 0.0f);
+    circle->transform.position = Vector3(-0.8f, 0.0f, 0.0f);
     DebugMenu();
 }

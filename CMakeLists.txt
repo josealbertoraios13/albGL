@@ -30,6 +30,12 @@ set(IMGUI_SRC
         src/Transform/Vector3.h
         src/Transform/Transform.cpp
         src/Transform/Transform.h
+        src/primitiveObjects/Triangle.cpp
+        src/primitiveObjects/Triangle.h
+        src/primitiveObjects/Rectangle.cpp
+        src/primitiveObjects/Rectangle.h
+        src/primitiveObjects/Ellipse.cpp
+        src/primitiveObjects/Ellipse.h
 )
 
 # Cria executável incluindo main.cpp e ImGui

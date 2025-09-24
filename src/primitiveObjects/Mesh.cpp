@@ -8,7 +8,14 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-Mesh::Mesh(const std::vector<float> &verts) : vertices(verts){
+using namespace glm;
+
+Mesh::Mesh() : VAO(0), VBO(0), shaderProgram(0), color(1, 1, 1, 1){
+    SetupMesh(); // Configura buffers OpenGl
+    SetupShader(); // Compila e linka shaders
+};
+
+Mesh::Mesh(const std::vector<float> &verts) : vertices(verts), VAO(0), VBO(0), shaderProgram(0), color(1, 1, 1, 1){
     SetupMesh(); // Configura buffers OpenGl
     SetupShader(); // Compila e linka shaders
 }
@@ -33,20 +40,40 @@ void Mesh::Draw() const {
 
     DefineProjection();
 
-    // Transformações
-    glm::mat4 model = glm::mat4(1.0f); // Matriz identidade
-
-    model = glm::translate(model, glm::vec3(transform.position.x, transform.position.y, transform.position.z));
-    model = glm::scale(model, glm::vec3(transform.scale.x, transform.scale.y, transform.scale.z));
-    model = glm::rotate(model, glm::radians(transform.rotation.z), glm::vec3(0, 0, 1));
-
     GLint modelLoc = glGetUniformLocation(shaderProgram, "model");
 
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+    GLint colorLoc = glGetUniformLocation(shaderProgram, "uColor");
+    glUniform4fv(colorLoc, 1, &color[0]);
+
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(Model()));
     glBindVertexArray(VAO);//Vincula o VAO do mesh
+
+    Render();
+}
+
+void Mesh::Render() const{
     // Renderiza os triângulos (3 componentes por vétice, dividido por 3 para número de  vétices)
-    glDrawArrays(GL_TRIANGLES, 0, vertices.size() / 3);
+    glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(vertices.size() / 3));
     glBindVertexArray(0);//Desvincula o VAO
+}
+
+mat4 Mesh::Model() const{
+    mat4 model = glm::mat4(1.0f); // Matriz identidade
+
+    model = translate(model, glm::vec3(transform.position.x, transform.position.y, transform.position.z));
+    model = rotate(model, glm::radians(transform.rotation.z), glm::vec3(0, 0, 1));
+    model = scale(model, glm::vec3(transform.scale.x, transform.scale.y, transform.scale.z));
+
+    return model;
+}
+
+void Mesh::SetColor(const glm::vec4 &_color) {
+    this->color = _color;
+}
+
+void Mesh::Initialize() {
+    SetupMesh();
+    SetupShader();
 }
 
 
@@ -60,7 +87,7 @@ void Mesh::SetupMesh() {
     glBindBuffer(GL_ARRAY_BUFFER, VBO);// Vincula VBO
 
     //Envia dados dos vétices para GPU
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(vertices.size() * sizeof(float)), vertices.data(), GL_STATIC_DRAW);
 
     //Define layout dos atibrutos de vétices
     //Atributo 0: 3 componentes (x, y, z) do tipo float, sem normalização
@@ -88,8 +115,9 @@ void Mesh::SetupShader() {
     const char* fragmentShaderSource = R"(
                 #version 330 core
                 out vec4 FragColor; // Cor de saída
+                uniform vec4 uColor;
                 void main(){
-                    FragColor = vec4(1.0, 1.0, 1.0, 1.0); //Branco opaco
+                    FragColor = uColor; //Branco opaco
                 }
             )";
 

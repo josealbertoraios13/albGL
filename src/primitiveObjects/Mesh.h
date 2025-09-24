@@ -10,7 +10,12 @@
 #include <GL/glew.h>
 #include <vector>
 #include <iostream>
+#include <glm/fwd.hpp>
+#include <glm/vec4.hpp>
+
 #include "../Transform/Transform.h"
+
+using namespace glm;
 
 class Mesh {
     public:
@@ -19,23 +24,33 @@ class Mesh {
         GLuint VBO;
         GLuint shaderProgram; // Identificador do programa de shader
         Transform transform; // Objeto de transformação (posição, rotação, escala)
+        glm::vec4 color;
+
+        Mesh();
 
         //Construtor: inicializa o mesh com vértices fornecidos
-        Mesh(const std::vector<float>& verts);
+        explicit Mesh(const std::vector<float>& verts);
 
         // Libera dados da memória evitando o memory leaks
-        ~Mesh();
+        virtual ~Mesh();
 
         //Desenha o mesh na tela aplicando as transformações
         void Draw() const;
 
-    private:
+        void SetColor(const glm::vec4& _color);
+        void Initialize();
+
+    protected:
+        virtual void Render() const;
         void DefineProjection() const;
         //Configura os buffers de vétices (VBO) e o vertex array (VAO)
         void SetupMesh();
 
         // Compila e linka os shaders vertex e fragment
         void SetupShader();
+
+    private:
+        mat4 Model() const;
 
         // Verifica erros de compilação/liking de shaders
         static void CheckCompileErrors(GLuint shader, const std::string &type);

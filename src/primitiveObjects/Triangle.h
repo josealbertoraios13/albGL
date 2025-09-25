@@ -9,14 +9,8 @@
 using namespace std;
 
 class Triangle : public Mesh{
-    private:
-        string name;
-
     public:
         Triangle();
-
-        void SetName(const string &_name);
-        string GetName();
 };
 
 

@@ -13,9 +13,12 @@
 #include <glm/fwd.hpp>
 #include <glm/vec4.hpp>
 
+#include  <memory>
+
 #include "../Transform/Transform.h"
 
 using namespace glm;
+using namespace std;
 
 class Mesh {
     public:
@@ -36,11 +39,22 @@ class Mesh {
 
         //Desenha o mesh na tela aplicando as transformações
         void Draw() const;
+        void DrawWithParent(const glm::mat4 &parentModel) const;
 
-        void SetColor(const glm::vec4& _color);
+        void SetColor(const vec4& _color);
+
+        void SetName(const string &_name);
+        string GetName() const;
+
+        void AddChild(const shared_ptr<Mesh> &child);
+        void RemoveChild(const shared_ptr<Mesh> &child);
+
         void Initialize();
 
     protected:
+        string name;
+        vector<shared_ptr<Mesh>> children;
+
         virtual void Render() const;
         void DefineProjection() const;
         //Configura os buffers de vétices (VBO) e o vertex array (VAO)

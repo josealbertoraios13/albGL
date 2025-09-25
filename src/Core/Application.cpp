@@ -7,11 +7,16 @@
 
 // Inclui headers do ImGui
 #include <imgui.h>
+#include <list>
 #include <backends/imgui_impl_sdl2.h>
 #include <backends/imgui_impl_opengl3.h>
+#include "../primitiveObjects/Mesh.h"
 
 #include <GL/glew.h>
 
+using namespace std;
+
+list<Mesh*> Application::m_Meshes;
 int Application::width = 800;   // valor inicial padrão
 int Application::height = 600;
 
@@ -40,7 +45,7 @@ int Application::Run() {
         last = now;
 
         // Calcula o deltaTime em segundos
-        m_DeltaTime = static_cast<float>((now - last) * 1000 / static_cast<double>(SDL_GetPerformanceFrequency()));
+        m_DeltaTime = static_cast<float>(static_cast<double>(now - last) * 1000 / static_cast<double>(SDL_GetPerformanceFrequency()));
 
         //Fase de Processamento
         ProcessEvents(); // Processa Input SDL_Event
@@ -48,6 +53,9 @@ int Application::Run() {
         //Fase de Renderização
         BeginFrame(); //Limpa o buffer, inicia frame ImGui
 
+        //Para o editor (ImGui)
+        HierarchyMenu(m_Meshes);
+        DebugMenu();
         //Fase de Atualização
         // Chama o Update() definido pelo usuário,passando o deltaTime
         Update(m_DeltaTime);
@@ -214,6 +222,104 @@ void Application::EndFrame() const{
     //Troca os buffers (Double buffering)
     SDL_GL_SwapWindow(m_Window);
 }
+
+
+//ImGui
+
+void Application::HierarchyMenu(const list<Mesh*> &objects,  bool enable) {
+    ImGui::SetNextWindowSize(ImVec2(300, 600));
+    ImGui::Begin("Hierarchy", nullptr, ImGuiWindowFlags_NoResize);
+
+    if (ImGui::TreeNode("Cena")) {
+        static Mesh* selected = nullptr;
+
+        for (auto* obj: objects) {
+
+            ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
+
+            if (selected == obj) {
+                flags |= ImGuiTreeNodeFlags_Selected;
+            }
+
+            ImGui::TreeNodeEx(obj->GetName().c_str(), flags);
+
+            if (ImGui::IsItemClicked()) {
+                selected = (selected == obj) ? nullptr : obj;
+            }
+        }
+
+        ImGui::TreePop();
+
+        if (selected) {
+            InspectorMenu(*selected); // chama uma única vez
+        }
+    }
+
+    // Mostrar o inspector APENAS para o selecionado
+
+
+    ImGui::End();
+}
+
+void Application::InspectorMenu(Mesh &obj, bool enable) {
+    ImGui::SetNextWindowSize(ImVec2(300, 600));
+    ImGui::Begin("Inspector", nullptr, ImGuiWindowFlags_NoResize);
+    ImGui::Text("To %s", obj.GetName().c_str());
+    ImGui::LabelText("", "Transform: ");
+    ImGui::LabelText("Position:", "");
+    ImGui::LabelText("", "X: ");
+    ImGui::SameLine();
+    ImGui::InputFloat("##X:", &obj.transform.position.x);
+    ImGui::SliderFloat("##x", &obj.transform.position.x, -2000.0f, 2000.0f);
+    ImGui::LabelText("", "Y: ");
+    ImGui::SameLine();
+    ImGui::InputFloat("##Y:", &obj.transform.position.y);
+    ImGui::SliderFloat("##y", &obj.transform.position.y, -2000.0f, 2000.0f);
+    ImGui::LabelText("", "Z: ");
+    ImGui::SameLine();
+    ImGui::InputFloat("##Z:", &obj.transform.position.z);
+    ImGui::SliderFloat("##z", &obj.transform.position.z, -2000.0f, 2000.0f);
+
+    ImGui::LabelText("Rotation:", "");
+    ImGui::LabelText("", "rX: ");
+    ImGui::SameLine();
+    ImGui::InputFloat("##rX:", &obj.transform.rotation.x);
+    ImGui::LabelText("", "rY: ");
+    ImGui::SameLine();
+    ImGui::InputFloat("##rY:", &obj.transform.rotation.y);
+    ImGui::LabelText("", "rZ: ");
+    ImGui::SameLine();
+    ImGui::InputFloat("##rZ:", &obj.transform.rotation.z);
+    ImGui::SliderFloat("##rz", &obj.transform.rotation.z, -360.0f, 360.0f);
+
+    ImGui::LabelText("Scales:", "");
+    ImGui::LabelText("", "Width: ");
+    ImGui::SameLine();
+    ImGui::InputFloat("##Width:", &obj.transform.scale.x);
+    ImGui::SliderFloat("##Width", &obj.transform.scale.x, -10.0f, 10.0f);
+    ImGui::LabelText("", "Height: ");
+    ImGui::SameLine();
+    ImGui::InputFloat("##Height:", &obj.transform.scale.y);
+    ImGui::SliderFloat("##Height", &obj.transform.scale.y, -10.0f, 10.0f);
+    ImGui::LabelText("", "Forward: ");
+    ImGui::SameLine();
+    ImGui::InputFloat("##Forward:", &obj.transform.rotation.z);
+
+    ImGui::End();
+}
+
+void Application::DebugMenu(bool enable) {
+    if (enable == false) {
+        return;
+    }
+
+    ImGui::SetNextWindowSize(ImVec2(300, 140));
+    ImGui::Begin("Debug", nullptr, ImGuiWindowFlags_NoResize);
+    ImGuiIO& io = ImGui::GetIO();
+    ImGui::Text("FPS: %.1f", io.Framerate);
+    ImGui::End();
+}
+
 
 
 

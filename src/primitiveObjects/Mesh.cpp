@@ -7,17 +7,22 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <algorithm>
 
 using namespace glm;
 
 Mesh::Mesh() : VAO(0), VBO(0), shaderProgram(0), color(1, 1, 1, 1){
+    SetName("newMesh");
     SetupMesh(); // Configura buffers OpenGl
     SetupShader(); // Compila e linka shaders
+    Application::m_Meshes.push_front(this);
 };
 
 Mesh::Mesh(const std::vector<float> &verts) : vertices(verts), VAO(0), VBO(0), shaderProgram(0), color(1, 1, 1, 1){
+    SetName("newMesh");
     SetupMesh(); // Configura buffers OpenGl
     SetupShader(); // Compila e linka shaders
+    Application::m_Meshes.push_front(this);
 }
 
 Mesh::~Mesh() {
@@ -28,7 +33,7 @@ Mesh::~Mesh() {
 
 void Mesh::DefineProjection() const{
     float aspect = static_cast<float>(Application::width) / static_cast<float>(Application::height);
-    glm::mat4 projection = glm::ortho(-aspect, aspect, -1.0f, 1.0f, -1.0f, 1.0f);
+    mat4 projection = glm::ortho(-aspect, aspect, -1.0f, 1.0f, -1.0f, 1.0f);
 
     GLint projLoc = glGetUniformLocation(shaderProgram, "projection");
     glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
@@ -41,26 +46,54 @@ void Mesh::Draw() const {
     DefineProjection();
 
     GLint modelLoc = glGetUniformLocation(shaderProgram, "model");
-
     GLint colorLoc = glGetUniformLocation(shaderProgram, "uColor");
     glUniform4fv(colorLoc, 1, &color[0]);
 
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(Model()));
-    glBindVertexArray(VAO);//Vincula o VAO do mesh
+    // matriz do próprio objeto
+    glm::mat4 modelMatrix = Model();
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelMatrix));
 
+    glBindVertexArray(VAO);//Vincula o VAO do mesh
     Render();
+    glBindVertexArray(0);//Desvincula o VAO
+
+    // Desenha filhos
+    for (const auto& child : children) {
+            child->DrawWithParent(modelMatrix);
+    }
 }
+
+void Mesh::DrawWithParent(const glm::mat4 &parentModel) const {
+    glUseProgram(shaderProgram);
+
+    DefineProjection();
+
+    GLint modelLoc = glGetUniformLocation(shaderProgram, "model");
+    GLint colorLoc = glGetUniformLocation(shaderProgram, "uColor");
+    glUniform4fv(colorLoc, 1, &color[0]);
+
+    glm::mat4 modelMatrix = parentModel * Model(); // aplica transformações do pai
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelMatrix));
+
+    glBindVertexArray(VAO);
+    Render();
+    glBindVertexArray(0);
+
+    for (const auto& child : children) {
+            child->DrawWithParent(modelMatrix);
+    }
+}
+
 
 void Mesh::Render() const{
     // Renderiza os triângulos (3 componentes por vétice, dividido por 3 para número de  vétices)
     glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(vertices.size() / 3));
-    glBindVertexArray(0);//Desvincula o VAO
 }
 
 mat4 Mesh::Model() const{
     mat4 model = glm::mat4(1.0f); // Matriz identidade
 
-    model = translate(model, glm::vec3(transform.position.x, transform.position.y, transform.position.z));
+    model = translate(model, glm::vec3(transform.position.x / 1000, transform.position.y / 1000, transform.position.z));
     model = rotate(model, glm::radians(transform.rotation.z), glm::vec3(0, 0, 1));
     model = scale(model, glm::vec3(transform.scale.x, transform.scale.y, transform.scale.z));
 
@@ -70,6 +103,26 @@ mat4 Mesh::Model() const{
 void Mesh::SetColor(const glm::vec4 &_color) {
     this->color = _color;
 }
+
+void Mesh::SetName(const string &_name) {
+    this->name = _name;
+}
+
+string Mesh::GetName() const{
+    return this->name;
+}
+
+void Mesh::AddChild(const shared_ptr<Mesh> &child) {
+    children.push_back(child);
+}
+
+void Mesh::RemoveChild(const shared_ptr<Mesh> &child) {
+    children.erase(
+        std::remove(children.begin(), children.end(), child),
+        children.end()
+    );
+}
+
 
 void Mesh::Initialize() {
     SetupMesh();

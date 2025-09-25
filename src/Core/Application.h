@@ -7,12 +7,17 @@
 
 #pragma once
 
+#include <list>
 #include <SDL.h>
+#include "../primitiveObjects/Mesh.h"
+
+using namespace std;
 
 struct ImGuiIO;
 
 class Application {
     public:
+        static list<Mesh*> m_Meshes;
         static int width;
         static int height;
         Application();
@@ -31,6 +36,11 @@ class Application {
         float GetTime() const {return m_Time; }
 
         static void setWindowSize(int _width, int _height);
+
+        //Para o editor
+        static void HierarchyMenu(const list<Mesh*> &objects, bool enable = true);
+        static void InspectorMenu(Mesh &obj, bool enable = true);
+        static void DebugMenu(bool enable = true);
 
     private:
         // Métodos internos para inicialização e limpeza

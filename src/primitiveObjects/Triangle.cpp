@@ -4,16 +4,11 @@
 
 #include "Triangle.h"
 
+#include "../Core/Application.h"
+
 Triangle::Triangle() : Mesh({-0.5f, -0.5f, 0.0f, 0.5f, -0.5f, 0.0f, 0.0f, 0.5f, 0.0f}){
     SetName("newTriangle");
-}
 
-void Triangle::SetName(const std::string &_name) {
-    this->name = _name;
-}
-
-string Triangle::GetName() {
-    return this->name;
 }
 
 

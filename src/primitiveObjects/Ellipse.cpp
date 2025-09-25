@@ -5,44 +5,35 @@
 #include "Ellipse.h"
 #include <cmath>
 
+#include "../Core/Application.h"
+
 using namespace std;
 
 Ellipse::Ellipse() {
-    vector<float> verts;
-    //Center
-    verts.push_back(0.0f);
-    verts.push_back(0.0f);
-    verts.push_back(0.0f);
+    // --- Cria vértices unitários ---
+    vertices.clear();
+    vertices.push_back(0.0f); // centro x
+    vertices.push_back(0.0f); // centro y
+    vertices.push_back(0.0f); // centro z
 
     int segments = 180;
-    float angleStep = 0;
-    angleStep = static_cast<float>(2.0f * M_PI / segments);
+    float angleStep = 2.0f * M_PI / segments;
 
     for (int i = 0; i <= segments; i++) {
-        float angle = static_cast<float>(i) * angleStep;
-        float x = this->transform.scale.x / 2 * cos(angle);
-        float y = this->transform.scale.y / 2 * sin(angle);
+        float angle = i * angleStep;
+        float x = 0.5f * cos(angle);
+        float y = 0.5f * sin(angle);
 
-        verts.push_back(x);
-        verts.push_back(y);
-        verts.push_back(0.0f);
+        vertices.push_back(x);
+        vertices.push_back(y);
+        vertices.push_back(0.0f);
     }
-
-    this->vertices = verts;
 
     SetName("newEllipse");
 
+    // --- Agora inicializa o VAO/VBO ---
     Initialize();
 }
-
-void Ellipse::SetName(const string &_name) {
-    this->name = _name;
-}
-
-string Ellipse::GetName() {
-    return this->name;
-}
-
 void Ellipse::Render() const{
     // Renderiza os triângulos (3 componentes por vétice, dividido por 3 para número de  vétices)
     glDrawArrays(GL_TRIANGLE_FAN, 0, static_cast<GLsizei>(vertices.size() / 3));

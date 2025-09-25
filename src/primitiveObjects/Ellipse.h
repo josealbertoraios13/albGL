@@ -9,14 +9,8 @@
 using namespace std;
 
 class Ellipse : public Mesh{
-    private:
-        string name;
-
     public:
         Ellipse();
-
-        void SetName(const string &_name);
-        string GetName();private:
 
     protected:
         void Render() const override;

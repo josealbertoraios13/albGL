@@ -28,6 +28,7 @@ class Mesh {
         GLuint shaderProgram; // Identificador do programa de shader
         Transform transform; // Objeto de transformação (posição, rotação, escala)
         glm::vec4 color;
+        vector<shared_ptr<Mesh>> children;
 
         Mesh();
 
@@ -53,7 +54,6 @@ class Mesh {
 
     protected:
         string name;
-        vector<shared_ptr<Mesh>> children;
 
         virtual void Render() const;
         void DefineProjection() const;

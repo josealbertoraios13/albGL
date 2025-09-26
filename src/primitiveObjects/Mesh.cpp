@@ -15,14 +15,12 @@ Mesh::Mesh() : VAO(0), VBO(0), shaderProgram(0), color(1, 1, 1, 1){
     SetName("newMesh");
     SetupMesh(); // Configura buffers OpenGl
     SetupShader(); // Compila e linka shaders
-    Application::m_Meshes.push_front(this);
 };
 
 Mesh::Mesh(const std::vector<float> &verts) : vertices(verts), VAO(0), VBO(0), shaderProgram(0), color(1, 1, 1, 1){
     SetName("newMesh");
     SetupMesh(); // Configura buffers OpenGl
     SetupShader(); // Compila e linka shaders
-    Application::m_Meshes.push_front(this);
 }
 
 Mesh::~Mesh() {
@@ -40,6 +38,12 @@ void Mesh::DefineProjection() const{
 }
 
 void Mesh::Draw() const {
+    auto it = std::find(Application::m_Meshes.begin(), Application::m_Meshes.end(), this);
+
+    if ((it == Application::m_Meshes.end())) {
+        Application::m_Meshes.push_front(const_cast<Mesh*>(this));
+    }
+
     //Ativa o programa de shader
     glUseProgram(shaderProgram);
 

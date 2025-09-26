@@ -4,6 +4,7 @@
 
 //Application.cpp
 #include "Application.h"
+#include <functional>
 
 // Inclui headers do ImGui
 #include <imgui.h>
@@ -226,40 +227,59 @@ void Application::EndFrame() const{
 
 //ImGui
 
-void Application::HierarchyMenu(const list<Mesh*> &objects,  bool enable) {
+void Application::HierarchyMenu(const list<Mesh*> &objects, bool enable) {
     ImGui::SetNextWindowSize(ImVec2(300, 600));
     ImGui::Begin("Hierarchy", nullptr, ImGuiWindowFlags_NoResize);
 
     if (ImGui::TreeNode("Cena")) {
         static Mesh* selected = nullptr;
 
-        for (auto* obj: objects) {
+        // Função recursiva para mostrar objetos e filhos
+        std::function<void(Mesh*)> ShowNode;
+        ShowNode = [&](Mesh* obj) {
+            ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow;
 
-            ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
+            // Se não tiver filhos, marca como folha
+            if (obj->children.empty()) {
+                flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
+            }
 
             if (selected == obj) {
                 flags |= ImGuiTreeNodeFlags_Selected;
             }
 
-            ImGui::TreeNodeEx(obj->GetName().c_str(), flags);
+            bool nodeOpen = ImGui::TreeNodeEx(obj->GetName().c_str(), flags);
 
+            // Seleção do item
             if (ImGui::IsItemClicked()) {
                 selected = (selected == obj) ? nullptr : obj;
             }
+
+            // Se tiver filhos e o nó estiver aberto, chama recursivamente
+            if (!obj->children.empty() && nodeOpen) {
+                for (auto& child : obj->children) {
+                    ShowNode(child.get());
+                }
+                ImGui::TreePop();
+            }
+        };
+
+        // Exibe todos os objetos da cena
+        for (auto* obj : objects) {
+            ShowNode(obj);
+        }
+
+        // Inspector para o objeto selecionado
+        if (selected) {
+            InspectorMenu(*selected);
         }
 
         ImGui::TreePop();
-
-        if (selected) {
-            InspectorMenu(*selected); // chama uma única vez
-        }
     }
-
-    // Mostrar o inspector APENAS para o selecionado
-
 
     ImGui::End();
 }
+
 
 void Application::InspectorMenu(Mesh &obj, bool enable) {
     ImGui::SetNextWindowSize(ImVec2(300, 600));
@@ -303,7 +323,7 @@ void Application::InspectorMenu(Mesh &obj, bool enable) {
     ImGui::SliderFloat("##Height", &obj.transform.scale.y, -10.0f, 10.0f);
     ImGui::LabelText("", "Forward: ");
     ImGui::SameLine();
-    ImGui::InputFloat("##Forward:", &obj.transform.rotation.z);
+    ImGui::InputFloat("##Forward:", &obj.transform.scale.z);
 
     ImGui::End();
 }
